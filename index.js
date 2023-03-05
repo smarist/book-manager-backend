@@ -12,7 +12,11 @@ const db = mysql2.createConnection({
   database: "test",
 });
 
-const upload = multer({ dest: 'uploads/' });
+const upload = multer({
+    limits: {
+      fileSize: 10 * 1024 * 1024, // maximum file size (in bytes)
+    },
+  });
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -42,7 +46,7 @@ app.get("/books/:id", (req, res) => {
 
 app.post("/books", upload.single('cover'), (req, res) => {
     const q = "INSERT INTO books (`title`, `desc`, `cover`, `price`) VALUES (?)";
-    const values = [req.body.title, req.body.desc, req.file.path, req.body.price];
+    const values = [req.body.title, req.body.desc, Buffer.from(req.body.cover, 'base64'), req.body.price];
     db.query(q, values, (err, data) => {
       if (err) return res.json(err);
       return res.json("Book has been created");
@@ -52,7 +56,7 @@ app.post("/books", upload.single('cover'), (req, res) => {
 app.put("/books/:id", upload.single('cover'), (req, res) => {
     const bookId = req.params.id;
     const q = "UPDATE books SET `title` = ?, `desc` = ?,`cover` = ?, `price` = ? WHERE id = ?";
-    const values = [req.body.title, req.body.desc, req.body.cover, req.body.price];
+    const values = [req.body.title, req.body.desc, Buffer.from(req.body.cover, 'base64'), req.body.price];
     db.query(q, [...values, bookId], (err, data) => {
       if (err) return res.json(err);
       return res.json("Book has been Updated Successfully");
