@@ -45,7 +45,7 @@ app.get("/books/:id", (req, res) => {
 });
 
 app.post("/books", upload.single('cover'), (req, res) => {
-    const q = "INSERT INTO books (`title`, `desc`, `cover`, `price`) VALUES (?)";
+    const q = "INSERT INTO books (`title`, `desc`, `cover`, `price`) VALUES (?, ?, ?, ?)";
     const values = [req.body.title, req.body.desc, Buffer.from(req.body.cover, 'base64'), req.body.price];
     db.query(q, values, (err, data) => {
       if (err) return res.json(err);
@@ -72,6 +72,6 @@ app.delete("/books/:id", (req, res) => {
     });
 });
 
-app.listen(8800, () => {
+app.listen(process.env.PORT || 8800, () => {
   console.log("Connected to backend");
 });
